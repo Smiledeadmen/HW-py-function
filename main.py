@@ -93,7 +93,7 @@ def move(inp, move_inp):
         del_in_shelf(inp)
         if move_inp in directories.keys():
             directories[move_inp].append(inp)
-            return f'Перемещена на {move_inp} полку'
+            return f'Документ {inp} перемещен на {move_inp} полку'
 
 
 def add_shelf(new_key):
@@ -152,5 +152,5 @@ def main():
         elif user_input == 'q':
             break
 
-
-main()
+if __name__ == "__main__":
+    main()
