@@ -9,21 +9,30 @@ directories = {
     '3': []
 }
 
+def help():
+    return """
+    p – people – команда, которая спросит номер документа и выведет имя человека, которому он принадлежит;
+    s – shelf – команда, которая спросит номер документа и выведет номер полки, на которой он находится;
+    l– list – команда, которая выведет список всех документов в формате passport "2207 876234" "Василий Гупкин";
+    ld– list-directories – команда, которая выведет список всех полок;
+    a – add – команда, которая добавит новый документ в каталог и в перечень полок;
 
-def people():
-    inp = input('Введите номер ')
+    d – delete – команда, которая спросит номер документа и удалит его из каталога и из перечня полок;
+    m – move – команда, которая спросит номер документа и целевую полку и переместит его с текущей полки на целевую;
+    as – add shelf – команда, которая спросит номер новой полки и добавит ее в перечень;
+    """
+def people(inp):
     num_list = []
     for num in documents:
         num_list.append(num["number"])
     if inp in num_list:
         name = next(x for x in documents if x["number"] == inp)
-        print(name["name"])
+        return name["name"]
     else:
-        print("Такого номера документа нет")
+        return "Такого номера документа нет"
 
 
-def shelf():
-    inp = input('Введите номер ')
+def shelf(inp):
     num_list = []
     for num in documents:
         num_list.append(num["number"])
@@ -31,34 +40,32 @@ def shelf():
         direct_list = directories.items()
         for x in direct_list:
             if inp in x[1]:
-                print(f'Документ находится на {x[0]} полке')
+                return f'Документ находится на {x[0]} полке'
     else:
-        print("Такого номера документа нет")
+        return "Такого номера документа нет"
 
 
 def list():
-    for string in documents:
-        print(string['type'], string['number'], string['name'])
+    return [[string['type'], string['number'], string['name']] for string in documents]
 
 
-def add():
+def list_directories():
+    return [(key, value) for key, value in directories.items()]
+
+def add(type_inp, number_inp, name_inp, dict_inp):
     new_dict = {}
-    type_inp = input('Введите тип документа: ')
-    number_inp = input('Введите номер документа: ')
-    name_inp = input('Введите фамилию и имя: ')
-    dict_inp = input('В какую полку положить документ ?')
     if dict_inp in directories.keys():
         new_dict['type'] = type_inp
         new_dict['number'] = number_inp
         new_dict['name'] = name_inp
         documents.append(new_dict)
         directories[dict_inp].append(number_inp)
+        return 'Добавлен в словарь и на полку'
     else:
-        print('Такой полки нет!')
+        return 'Такой полки нет!'
 
 
-def delete():
-    inp = input('Введите номер документа который вы хотите удалить: ')
+def delete(inp):
     num_list = []
     for num in documents:
         num_list.append(num["number"])
@@ -66,65 +73,82 @@ def delete():
         for i in range(len(documents)):
             if documents[i]['number'] == inp:
                 del documents[i]
-                print(f'Документ {inp} удален из списка!')
-                for element in directories.values():
-                    if inp in element:
-                        element.remove(inp)
-                    print(element)
-                print(f'Документ {inp} удален c полки!')
-                print(directories.items())
-                break
+                return f'Документ {inp} удален из списка!'
     else:
-        print("Такого номера документа нет")
+        return "Такого номера документа нет"
+
+def del_in_shelf(inp):
+    for element in directories.values():
+        if inp in element:
+            element.remove(inp)
+            return f'Документ {inp} удален c полки!'
 
 
-def move():
-    num_imp = input('Введите номер документа, который хотите переместить: ')
-    num_list = []
-    for num in documents:
-        num_list.append(num["number"])
-    if num_imp in num_list:
-        for element in directories.values():
-            print(element)
-            if num_imp in element:
-                element.remove(num_imp)
-    else:
-        print("Такого номера документа нет")
-    move_inp = input('Введите номер полки, в которую хотите переместить документ: ')
-    if move_inp in directories.keys():
-        directories[move_inp].append(num_imp)
-        print(directories.items())
-    else:
-        print('Такой полки нет!')
+def move(inp, move_inp):
+    if not check_document(inp):
+        return "Такого номера документа нет"
+    if not check_shelf(move_inp):
+        return 'Такой полки нет!'
+    if check_document(inp) == True and check_shelf(move_inp) == True:
+        del_in_shelf(inp)
+        if move_inp in directories.keys():
+            directories[move_inp].append(inp)
+            return f'Перемещена на {move_inp} полку'
 
 
-def add_shelf():
-    new_key = input('Введите номер новой полки: ')
+def add_shelf(new_key):
     if new_key in directories.keys():
-        print('Такая полка уже есть!')
+        return 'Такая полка уже есть!'
     else:
-        print('Такая полки нет!')
         directories[new_key] = []
-        print(f'Полка номер {new_key} создана!')
+        return f'Полка номер {new_key} создана!'
 
+def check_document(number):
+    lst = [el["number"] for el in documents]
+    if number in lst:
+        return True
+    else:
+        return False
+
+def check_shelf(number):
+    if number in directories.keys():
+        return True
+    else:
+        return False
 
 def main():
+    print('Для помощи введите help')
     while True:
         user_input = input("Введите команду: ")
         if user_input == 'p':
-            people()
+            inp = input('Введите номер ')
+            print(people(inp))
         elif user_input == 's':
-            shelf()
+            inp = input('Введите номер ')
+            print(shelf(inp))
         elif user_input == 'l':
-            list()
+            print(list())
+        elif user_input == 'ld':
+            print(list_directories())
         elif user_input == 'a':
-            add()
+            type_inp = input('Введите тип документа: ')
+            number_inp = input('Введите номер документа: ')
+            name_inp = input('Введите фамилию и имя: ')
+            dict_inp = input('В какую полку положить документ ? ')
+            print(add(type_inp, number_inp, name_inp, dict_inp))
         elif user_input == 'd':
-            delete()
+            inp = input('Введите номер документа который вы хотите удалить: ')
+            print(delete(inp))
+            print(del_in_shelf(inp))
         elif user_input == 'm':
-            move()
+            inp = input('Введите номер документа, который хотите переместить: ')
+            move_inp = input('Введите номер полки, в которую хотите переместить документ: ')
+            print(move(inp, move_inp))
         elif user_input == 'as':
-            add_shelf()
+            new_key = input('Введите номер новой полки: ')
+            print(add_shelf(new_key))
+        elif user_input == 'help':
+            print(help())
         elif user_input == 'q':
             break
 
